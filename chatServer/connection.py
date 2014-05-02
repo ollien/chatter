@@ -8,7 +8,7 @@ class Connection():
 		self.bufferSize=bufferSize
 		print self.recvMessage
 		print type(self.recvMessage)
-		self.incoming=incomingConnection.IncomingConnection(self.connection,self.userId,self.bufferSize,self.recvMessage)
+		self.incoming=incomingConnection.IncomingConnection(self.connection,self.userId,self.bufferSize,self.recvMessage,self.closeConnections)
 		self.outgoing=outgoingConnection.OutgoingConnection(self.connection,self.userId)
 		self.incoming.start()
 		self.passMessageUp=passMessageUpFunction
