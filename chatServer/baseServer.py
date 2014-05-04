@@ -21,23 +21,23 @@ class BaseServer(threading.Thread):
 	def addUser(self,userId,connection):
 		if userId not in self.connectedUsers.keys():
 			if connection is not None:
-				self.connectedUsers[userId]=connectionClass.Connection(connection,userId,self.recvMessage,self.bufferSize)
+				self.connectedUsers[userId]=connectionClass.Connection(connection,userId,self.bufferSize,self.removeConnection,self.recvMessage)
 			else:
 				raise ValueError("The connection is null.")
 		else:
 			raise ValueError("User " + str(userId) + "Already exists.")
-	def recvMessage(self,message,userId):
-		sendMessage=str(userId)+":"+message
-		for user in self.connectedUsers:
-			if user is not userId:
-				self.connectedUsers[user].outgoing.send(sendMessage)
-				
 	def recvConnection(self,connection):
 		try:
 			self.addUser(uuid4().hex,connection)
 		#This should never actually be needed, but worst case scneario ittl keep trying to create users until an unkown id is found.
 		except ValueError,error:
 			print error
+	def recvMessage(self,message,userId):
+		sendMessage=str(userId)+":"+message
+		for user in self.connectedUsers:
+			if user is not userId:
+				self.connectedUsers[user].outgoing.send(sendMessage)
+
 	def killThreads(self):
 		if self.sock is not None:
 			self.sock.close()
@@ -49,5 +49,8 @@ class BaseServer(threading.Thread):
 			self.listener.alive=False
 		raise SystemExit
 		return
-			
-		
+	def removeConnection(self,userId):
+		try:
+			del self.connectedUsers[userId]
+		except KeyError:
+			raise ValueError("User not Found")		
